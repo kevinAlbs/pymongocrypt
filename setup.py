@@ -14,6 +14,5 @@ setup (name = 'pymongocrypt',
         description = 'A proof-of-concept',
         ext_modules = [pymongocrypt_module],
         data_files = ["./libmongocrypt/libmongocrypt.dylib"],
-        zip_safe = False,
-        packages = ['wrapper']
+        zip_safe = False
         )
