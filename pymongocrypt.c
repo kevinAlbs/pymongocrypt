@@ -2,45 +2,93 @@
 #include "pymongocrypt.h"
 #include "mongocrypt.h"
 
+/* TODO: apply concurrency controls. */
+static mongoc_crypt_t* crypt_handle;
+
 static PyObject *
 _encrypt (PyObject *self, PyObject *args) {
-    char* doc;
-    int doc_len;
+    mongoc_crypt_bson_t schema = {0}, doc = {0}, out = {0};
 
-    if (!PyArg_ParseTuple(args, "s#", &doc, &doc_len)) {
-        return NULL;
+    if (!PyArg_ParseTuple(args, "s#s#", &schema.data, &schema.len, &doc.data, &doc.len)) {
+        Py_RETURN_FALSE;
     }
     
-    printf("got buffer of size: %d\n", doc_len);
-    return Py_BuildValue("i", 1);
+    mongoc_crypt_error_t error;
+
+    int ret = mongoc_crypt_encrypt (crypt_handle, &schema, &doc, &out, &error);
+    
+    if (!ret) {
+        printf("error: %s\n", error.message);
+        Py_RETURN_FALSE;
+    }
+
+    return Py_BuildValue("s#", out.data, out.len);
 } 
+
+
+static PyObject *
+_decrypt (PyObject *self, PyObject *args) {
+    mongoc_crypt_bson_t doc = {0}, out = {0};
+
+    if (!PyArg_ParseTuple(args, "s#", &doc.data, &doc.len)) {
+        Py_RETURN_FALSE;
+    }
+    
+    mongoc_crypt_error_t error;
+
+    int ret = mongoc_crypt_decrypt (crypt_handle, &doc, &out, &error);
+    
+    if (!ret) {
+        printf("error: %s\n", error.message);
+        Py_RETURN_FALSE;
+    }
+
+    return Py_BuildValue("s#", out.data, out.len);
+}
 
 
 static PyObject *
 _setup (PyObject *self, PyObject *args) {
     char* aws_region, *aws_access_key_id, *aws_secret_access_key;
     if (!PyArg_ParseTuple(args, "sss", &aws_region, &aws_access_key_id, &aws_secret_access_key)) {
-        return NULL;
+        Py_RETURN_FALSE;
     }
-    printf("aws_region=%s\n", aws_region);
+
+    if (crypt_handle) {
+        printf("already set up\n");
+        Py_RETURN_FALSE;
+    }
 
     mongoc_crypt_init();
 
-    return Py_BuildValue("i", 1);
+    mongoc_crypt_opts_t* opts = mongoc_crypt_opts_new();
+    mongoc_crypt_opts_set_opt (opts, MONGOCRYPT_AWS_REGION, aws_region);
+    mongoc_crypt_opts_set_opt (opts, MONGOCRYPT_AWS_ACCESS_KEY_ID, aws_access_key_id);
+    mongoc_crypt_opts_set_opt (opts, MONGOCRYPT_AWS_SECRET_ACCESS_KEY, aws_secret_access_key);
+
+    mongoc_crypt_error_t error;
+    crypt_handle = mongoc_crypt_new(opts, &error);
+    if (!crypt_handle) {
+        printf("error: %s\n", error.message);
+        Py_RETURN_FALSE;
+    }
+
+    Py_RETURN_TRUE;
 }
 
 
 static PyObject *
 _cleanup(PyObject *self, PyObject *args) {
     mongoc_crypt_cleanup();
-    return Py_BuildValue("i", 1);
+    Py_RETURN_TRUE;
 }
 
 
 static PyMethodDef CryptMethods[] = {
-    {"encrypt", _encrypt, METH_VARARGS, "encrypt a document"},
     {"setup", _setup, METH_VARARGS, "set options and initialize"},
     {"cleanup", _cleanup, METH_VARARGS, "set options and initialize"},
+    {"encrypt", _encrypt, METH_VARARGS, "encrypt a document"},
+    {"decrypt", _decrypt, METH_VARARGS, "decrypt a document"},
     {NULL, NULL, 0, NULL} /* sentinel */
 };
 
