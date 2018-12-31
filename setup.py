@@ -6,7 +6,8 @@ pymongocrypt_module = Extension('pymongocrypt',
     include_dirs = ["./libmongocrypt/"],
     library_dirs = ["./libmongocrypt"],
     libraries = ["mongocrypt"],
-    extra_link_args = ["-rpath", "@loader_path"])
+    # for some reason, pip install installs libmongocrypt.dylib into the root of the virtual environment.
+    extra_link_args = ["-rpath", "@loader_path", "-rpath", "@loader_path/../../../"])
 
 # adding things to data_files just puts them in the egg.
 setup (name = 'pymongocrypt',
@@ -14,5 +15,8 @@ setup (name = 'pymongocrypt',
         description = 'A proof-of-concept',
         ext_modules = [pymongocrypt_module],
         data_files = ["./libmongocrypt/libmongocrypt.dylib"],
+        packages = ["pymongocrypt"],
+        package_dir = {"pymongocrypt": "."},
+        package_data = {"pymongocrypt": ['./libmongocrypt/libmongocrypt.dylib']},
         zip_safe = False
         )

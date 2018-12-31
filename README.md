@@ -29,3 +29,5 @@ That *still* didn't work. But I noticed after unzipping the egg and loading the 
 To look at something's dependant libraries: `otool -L something`
 To check all of the rpath values, look at the end of `otool -l something` for LC_RPATH entries.
 To modify an rpath, use `install_name_tool`.
+
+Weirdly, `pip install .` differs from `python setup.py` in where libmongocrypt.dylib is installed.
