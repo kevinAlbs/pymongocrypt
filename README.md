@@ -31,3 +31,5 @@ To check all of the rpath values, look at the end of `otool -l something` for LC
 To modify an rpath, use `install_name_tool`.
 
 Weirdly, `pip install .` differs from `python setup.py` in where libmongocrypt.dylib is installed.
+
+If pip doesn't seem to work, delete anything pip builds and try again.
