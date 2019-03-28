@@ -18,13 +18,14 @@
 
 /* Utilities for cross-platform and C89 compatibility */
 
-/* TODO: check for stdbool in cmake. */
-#ifndef BSON_HAVE_STDBOOL_H
-#define BSON_HAVE_STDBOOL_H 1
 /* Copied from bson-compat.h from the C driver. */
 #include <stdint.h>
-#ifdef BSON_HAVE_STDBOOL_H
 #include <stdbool.h>
+#ifdef MONGOCRYPT_HAVE_STDBOOL_H
+/*
+ TODO - check for stdbool.h if we need to support older compilers and reconile
+ with kms-message's rules for including stdbool.h
+*/
 #elif !defined(__bool_true_false_are_defined)
 #ifndef __cplusplus
 typedef signed char bool;
@@ -34,5 +35,4 @@ typedef signed char bool;
 #define __bool_true_false_are_defined 1
 #endif
 
-#endif
 #endif /* MONGOCRYPT_COMPAT_H */

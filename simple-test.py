@@ -14,17 +14,18 @@ opt_type = {
    "MONGOCRYPT_LOG_CTX" : 4
 }
 
+states = [
+    "MONGOCRYPT_CTX_ERROR",
+    "MONGOCRYPT_CTX_NOTHING_TO_DO",
+    "MONGOCRYPT_CTX_NEED_MONGO_COLLINFO",
+    "MONGOCRYPT_CTX_NEED_MONGO_MARKINGS",
+    "MONGOCRYPT_CTX_NEED_MONGO_KEYS",
+    "MONGOCRYPT_CTX_NEED_KMS",
+    "MONGOCRYPT_CTX_READY",
+    "MONGOCRYPT_CTX_DONE"
+]
+
 def print_state(ctx):
-    states = [
-        "MONGOCRYPT_CTX_ERROR",
-        "MONGOCRYPT_CTX_NOTHING_TO_DO",
-        "MONGOCRYPT_CTX_NEED_MONGO_COLLINFO",
-        "MONGOCRYPT_CTX_NEED_MONGO_MARKINGS",
-        "MONGOCRYPT_CTX_NEED_MONGO_KEYS",
-        "MONGOCRYPT_CTX_NEED_KMS",
-        "MONGOCRYPT_CTX_READY",
-        "MONGOCRYPT_CTX_DONE"
-    ]
     print("\nlibmongocrypt in state: {}".format(states[ctx.state()]))
 
 

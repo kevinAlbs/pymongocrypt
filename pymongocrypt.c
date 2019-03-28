@@ -9,6 +9,7 @@ void _status_to_exception (mongocrypt_status_t* status) {
     PyErr_SetString(PyExc_RuntimeError, msg);
 }
 
+/* Types */
 typedef struct {
     PyObject_HEAD
     mongocrypt_ctx_t* v;
@@ -35,11 +36,13 @@ typedef struct {
     mongocrypt_opts_t* v;
 } py_mongocrypt_opts_t;
 
+
 /* mongocrypt_kms_ctx_t */
 PyObject* py_mongocrypt_kms_ctx_message (PyObject *self, PyObject *args) {
     py_mongocrypt_kms_ctx_t* ctx = (py_mongocrypt_kms_ctx_t*) self;
     py_mongocrypt_binary_t* bin;
 
+    /* TODO: check type. */
     if (!PyArg_ParseTuple(args, "O", (PyObject**)&bin)) {
         return NULL;
     }
@@ -101,6 +104,7 @@ static PyTypeObject py_mongocrypt_kms_ctx_type = {
     .tp_new = PyType_GenericNew,
     .tp_methods = py_mongocrypt_kms_ctx_methods
 };
+
 
 /* mongocrypt_ctx_t */
 int

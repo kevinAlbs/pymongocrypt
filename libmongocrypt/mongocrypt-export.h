@@ -22,7 +22,7 @@
 #endif
 
 #ifndef MONGOCRYPT_DEPRECATED
-#  define MONGOCRYPT_DEPRECATED __attribute__ ((__deprecated__))
+#  define MONGOCRYPT_DEPRECATED 
 #endif
 
 #ifndef MONGOCRYPT_DEPRECATED_EXPORT
