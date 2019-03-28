@@ -17,15 +17,12 @@ def satisfy_kms_request(kms):
     kms.message(bin)
     with socket.create_connection((hostname, 443)) as sock:
         with context.wrap_socket(sock, server_hostname=hostname) as ssock:
-            print(ssock.version())
             ssock.sendall(bin.data())
             data = ssock.recv()
             while data:
-                print(data)
                 bin = pymongocrypt.Binary(data)
                 kms.feed(bin)
                 data = ssock.recv()
-    print("done with kms request")
 
 
 codec_options = CodecOptions(uuid_representation=bson.binary.STANDARD)
@@ -90,7 +87,6 @@ def run_machine(ctx, cmd, db, client):
             del(tmp[cmd_name])
             response = client.__mongocryptd_client["admin"].command(
                 cmd_name, cmd_val, **tmp, codec_options=codec_options)
-            print("got back: {}".format(response))
             bin = pymongocrypt.Binary(bson.BSON.encode(
                 response, codec_options=codec_options))
             ctx.mongo_feed(bin)
@@ -105,7 +101,6 @@ def run_machine(ctx, cmd, db, client):
                 ctx.mongo_feed(bin)
             ctx.mongo_done()
         elif states[ctx.state()] == "MONGOCRYPT_CTX_NEED_KMS":
-            print("Now we need KMS to decrypt some things")
             kms = ctx.next_kms_ctx()
             while kms is not None:
                 satisfy_kms_request(kms)
@@ -114,7 +109,6 @@ def run_machine(ctx, cmd, db, client):
         elif states[ctx.state()] == "MONGOCRYPT_CTX_READY":
             ctx.finalize(bin)
             final = bson.BSON.decode(bin.data())
-            print("Got result: {}".format(json_util.dumps(final)))
             return final
         else:
             print("terminal state hit: {}".format(states[ctx.state()]))
@@ -136,4 +130,6 @@ def auto_decrypt(doc, db, client):
 
 cmd = SON([("find", "crypt"), ("filter", SON([("ssn", "457-55-5462")]))])
 encrypted = auto_encrypt(cmd, "test", client)
+print ("encrypted to: {}".format(encrypted))
 decrypted = auto_decrypt(encrypted, "test", client)
+print ("decrypted to: {}".format(decrypted))
