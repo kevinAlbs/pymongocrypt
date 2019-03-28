@@ -161,15 +161,6 @@ PyObject* py_mongocrypt_ctx_mongo_feed (PyObject *self, PyObject *args) {
         return NULL;
     }
 
-    Py_INCREF ((PyObject*) bin);
-
-    char* data = (char*)mongocrypt_binary_data(bin->v);
-    printf("in python, feeding:\n");
-    for (int i = 0; i < mongocrypt_binary_len(bin->v); i++) {
-        printf("%c", data[i]);
-    }
-    fflush (stdout);
-
     if (!mongocrypt_ctx_mongo_feed (ctx->v, bin->v)) {
         mongocrypt_status_t *status = mongocrypt_status_new();
         mongocrypt_ctx_status (ctx->v, status);
@@ -177,8 +168,6 @@ PyObject* py_mongocrypt_ctx_mongo_feed (PyObject *self, PyObject *args) {
         mongocrypt_status_destroy (status);
         return NULL;
     }
-
-    Py_DECREF ((PyObject*) bin);
     
     Py_RETURN_NONE;
 }
@@ -403,12 +392,10 @@ int py_mongocrypt_binary_init(PyObject *self, PyObject *args, PyObject *kwds) {
     }
 
     if (input && PyBytes_Check(input)) {
-        Py_INCREF (input); /* TODO: store this in my binary object. */
-        printf("this is a bytes object\n");
+        Py_INCREF (input);
         bin->v = mongocrypt_binary_new_from_data((uint8_t*)PyBytes_AsString (input), (uint32_t)PyBytes_Size (input));
         bin->owned_binary = input;
     } else {
-        printf("no\n");
         bin->owned_binary = NULL;
         bin->v = mongocrypt_binary_new ();
     }
